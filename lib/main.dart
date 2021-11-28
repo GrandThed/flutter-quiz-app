@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -42,14 +44,15 @@ class _MyAppState extends State<MyApp> {
   // estado
   int questionIndex = 0;
   List<Awnser> awnsers = [];
-  void handleNextQuestion(question, awnser, index) {
+  void handleNextQuestion(question, awnser) {
     setState(() {
+      awnsers = [
+        ...awnsers.sublist(0, questionIndex),
+        Awnser(question: question, awnser: awnser)
+      ];
       questionIndex += 1;
-      awnsers = [...awnsers, Awnser(question: question, awnser: awnser)];
     });
   }
-
-  handleSubmit() {}
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +74,7 @@ class _MyAppState extends State<MyApp> {
             ),
             Padding(
                 padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                child: questionIndex >= preguntas.length - 1
+                child: questionIndex >= preguntas.length
                     ? AwnsersBody(awnsers: awnsers)
                     : QuestionBody(
                         question: preguntas[questionIndex],
@@ -85,14 +88,43 @@ class _MyAppState extends State<MyApp> {
 }
 
 class AwnsersBody extends StatelessWidget {
+  final List<Awnser> awnsers;
+
   const AwnsersBody({
-    required List<Awnser> awnsers,
+    required this.awnsers,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Text("awnsers");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        for (var awnser in awnsers)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Text(
+                "¿" + awnser.question.replaceAll(RegExp(r"[?¿]"), "") + "?",
+                style: const TextStyle(color: Colors.white70, fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                "Respuesta: " + awnser.awnser,
+                style: const TextStyle(color: Colors.white70, fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                "--------------------",
+                style: TextStyle(color: Colors.red, fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          )
+      ],
+    );
   }
 }
 
@@ -134,7 +166,7 @@ class _QuestionBodyState extends State<QuestionBody> {
             for (var i = 0; i < widget.question.awnsers.length; i++)
               ElevatedButton(
                   onPressed: () => widget.handleNextQuestion(
-                      widget.question.question, widget.question.awnsers[i], i),
+                      widget.question.question, widget.question.awnsers[i]),
                   child: Text(widget.question.awnsers[i])),
           ],
         )
